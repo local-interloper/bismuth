@@ -8,14 +8,14 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-type Bismuth struct {
+type Bot struct {
 	session           *discordgo.Session
 	commands          map[string]Command
 	messageProcessors []MessageProcessor
 }
 
-func NewBismuth(token string) (*Bismuth, error) {
-	app := &Bismuth{}
+func NewBot(token string) (*Bot, error) {
+	app := &Bot{}
 
 	session, err := discordgo.New("Bot " + token)
 
@@ -25,32 +25,32 @@ func NewBismuth(token string) (*Bismuth, error) {
 
 	app.session = session
 
-	app.commands = make(map[string]Command)
+	app.commands = map[string]Command{}
 
 	return app, nil
 }
 
-func (b *Bismuth) RegisterCommand(command Command) {
+func (b *Bot) RegisterCommand(command Command) {
 	b.commands[command.Command.Name] = command
 }
 
-func (b *Bismuth) RegisterCommands(commands []Command) {
+func (b *Bot) RegisterCommands(commands []Command) {
 	for _, command := range commands {
 		b.RegisterCommand(command)
 	}
 }
 
-func (b *Bismuth) RegisterMessageProcessor(processor MessageProcessor) {
+func (b *Bot) RegisterMessageProcessor(processor MessageProcessor) {
 	b.messageProcessors = append(b.messageProcessors, processor)
 }
 
-func (b *Bismuth) RegisterMessageProcessors(processors []MessageProcessor) {
+func (b *Bot) RegisterMessageProcessors(processors []MessageProcessor) {
 	for _, processor := range processors {
 		b.RegisterMessageProcessor(processor)
 	}
 }
 
-func (b *Bismuth) initCommands() {
+func (b *Bot) initCommands() {
 	b.session.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		command, ok := b.commands[i.ApplicationCommandData().Name]
 
@@ -69,7 +69,7 @@ func (b *Bismuth) initCommands() {
 	}
 }
 
-func (b *Bismuth) initMessageProcessing() {
+func (b *Bot) initMessageProcessing() {
 	b.session.AddHandler(func(s *discordgo.Session, m *discordgo.MessageCreate) {
 		if m.Message.Author.ID == s.State.User.ID {
 			return
@@ -85,7 +85,7 @@ func (b *Bismuth) initMessageProcessing() {
 	})
 }
 
-func (b *Bismuth) Start() error {
+func (b *Bot) Start() error {
 	if err := b.session.Open(); err != nil {
 		return err
 	}
