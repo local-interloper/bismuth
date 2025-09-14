@@ -51,6 +51,16 @@ func (b *Bot) RegisterMessageProcessors(processors []MessageProcessor) {
 }
 
 func (b *Bot) initCommands() {
+	commands, err := b.session.ApplicationCommands(b.session.State.Application.ID, "")
+
+	if err != nil {
+		log.Panic("Failed to cleanup commands")
+	}
+
+	for _, command := range commands {
+		b.session.ApplicationCommandDelete(b.session.State.Application.ID, "", command.ID)
+	}
+
 	b.session.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		command, ok := b.commands[i.ApplicationCommandData().Name]
 
